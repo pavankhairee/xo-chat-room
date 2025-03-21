@@ -23,14 +23,12 @@ wss.on("connection", (socket) => {
                 allSockets.set(socket, { socket, room: roomId });
 
                 socket.send(JSON.stringify({ type: "joined", roomId }));
-                console.log(`✅ User joined room: ${roomId}`);
+
             }
 
 
             if (parsedMessage.type === "chat") {
                 const { roomId, message } = parsedMessage.payload;
-
-                console.log(`💬 Message in room ${roomId}: ${message}`);
 
                 allSockets.forEach((client) => {
                     if (client.room === roomId && client.socket !== socket) {
@@ -41,15 +39,14 @@ wss.on("connection", (socket) => {
                 });
             }
         } catch (error) {
-            console.error("❌ Error parsing message:", error);
+
         }
     });
 
 
     socket.on("close", () => {
         allSockets.delete(socket);
-        console.log("❌ User disconnected");
     });
 });
 
-console.log("✅ WebSocket server running on ws://localhost:8080");
+

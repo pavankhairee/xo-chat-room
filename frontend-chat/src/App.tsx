@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 function App() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [chat, setChat] = useState<string[]>([]);
+  const [chat, setChat] = useState<{ sender: boolean; text: string }[]>([]);
   const [message, setMessage] = useState<string>("");
 
-  // ✅ Connect WebSocket
+
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
 
@@ -17,7 +17,6 @@ function App() {
       setSocket(ws);
     };
 
-    // ✅ Handle incoming messages (including from Postman)
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
@@ -27,7 +26,7 @@ function App() {
       }
 
       if (data.type === "chat") {
-        setChat((prev) => [...prev, data.payload]); // ✅ Display message in chat
+        setChat((prev) => [...prev, { sender: false, text: data.payload }]);
       }
     };
 
@@ -35,7 +34,6 @@ function App() {
 
     return () => ws.close();
   }, []);
-
 
   const joinRoom = () => {
     const enteredRoomId = inputRef.current?.value;
@@ -49,30 +47,25 @@ function App() {
     }
   };
 
-
   useEffect(() => {
     if (messageRef.current) {
       messageRef.current.scrollTop = messageRef.current.scrollHeight;
     }
   }, [chat]);
 
-
   const sendMessage = () => {
-    if (socket && message && roomId) {
+    if (socket && message.trim() && roomId) {
       socket.send(
         JSON.stringify({
           type: "chat",
           payload: { roomId, message },
         })
       );
-      if (message.trim() !== "") {
-        setChat([...chat, message])
-      }
+      setChat([...chat, { sender: true, text: message }]);
       setMessage("");
     }
   };
 
-  // ✅ Generate Room ID
   const generateRoomId = () => {
     if (socket) {
       socket.send(
@@ -85,17 +78,29 @@ function App() {
   };
 
   return (
-    <div className="p-4">
-      <div className="border flex  bg-cyan-200 p-2">
+    <div className="p-4 max-w-lg mx-auto">
+      <div className="border bg-cyan-200 p-2 flex flex-col gap-2">
         <div>
           <h4>Generate a room ID:</h4>
-          <button onClick={generateRoomId} className="ml-2 bg-blue-500 text-white px-4 py-2 rounded">Generate</button>
+          <button
+            onClick={generateRoomId}
+            className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Generate
+          </button>
           {roomId && <span className="ml-2">Room ID: {roomId} </span>}
         </div>
         <div>
-          Room ID:
-          <input ref={inputRef} className="rounded-md border-black p-2 ml-2" type="text" placeholder="Enter the room ID" />
-          <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded" onClick={joinRoom}>
+          <input
+            ref={inputRef}
+            className="border p-2 rounded-md"
+            type="text"
+            placeholder="Enter Room ID"
+          />
+          <button
+            className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={joinRoom}
+          >
             Join Room
           </button>
         </div>
@@ -104,11 +109,17 @@ function App() {
 
       <div
         ref={messageRef}
-        className="border p-2 h-60 overflow-y-auto bg-gray-100 mt-4"
+        className="border p-2 h-80 overflow-y-auto bg-gray-100 mt-4 flex flex-col gap-2"
       >
         {chat.map((msg, index) => (
-          <div key={index} className="py-1 px-2 rounded bg-white shadow-sm mb-1">
-            {msg}
+          <div
+            key={index}
+            className={`py-1 px-2 rounded shadow-sm max-w-xs ${msg.sender
+              ? "bg-green-400 text-white self-end"
+              : "bg-white text-black self-start"
+              }`}
+          >
+            {msg.text}
           </div>
         ))}
       </div>
