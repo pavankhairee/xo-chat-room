@@ -81,14 +81,13 @@ function App() {
     <div className="p-4 max-w-lg mx-auto">
       <div className="border bg-cyan-200 p-2 flex flex-col gap-2">
         <div>
-          <h4>Generate a room ID:</h4>
           <button
             onClick={generateRoomId}
             className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
           >
-            Generate
+            Generate a room ID
           </button>
-          {roomId && <span className="ml-2">Room ID: {roomId} </span>}
+          {roomId && <span className="ml-8 text-xl">{roomId} </span>}
         </div>
         <div>
           <input
