@@ -65,6 +65,9 @@ function App() {
           payload: { roomId, message },
         })
       );
+      if (message.trim() !== "") {
+        setChat([...chat, message])
+      }
       setMessage("");
     }
   };
@@ -99,7 +102,7 @@ function App() {
       </div>
 
 
-      {/* <div
+      <div
         ref={messageRef}
         className="border p-2 h-60 overflow-y-auto bg-gray-100 mt-4"
       >
@@ -125,7 +128,7 @@ function App() {
         >
           Send
         </button>
-      </div> */}
+      </div>
     </div>
   );
 }
