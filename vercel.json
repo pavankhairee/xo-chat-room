@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "/frontend-chat/index.html"
+            "destination": "/frontend-chat/src/main.tsx"
         }
     ]
 }
